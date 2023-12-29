@@ -443,6 +443,16 @@ def cry_pmg2gui(structure, gui_file=None, pbc=None, vacuum=None, symmetry=True,
     gui = Crystal_gui()
     dimensionality = pbc.count(True)
 
+    # Vacuum distance
+    latt_mx = np.eye(3)*500
+    if vacuum != None:
+        thickness_x = np.amax(structure.cart_coords[:, 0]) - np.amin(structure.cart_coords[:, 0])
+        thickness_y = np.amax(structure.cart_coords[:, 1]) - np.amin(structure.cart_coords[:, 1])
+        thickness_z = np.amax(structure.cart_coords[:, 2]) - np.amin(structure.cart_coords[:, 2])
+        latt_mx[0, 0] = thickness_x + vacuum
+        latt_mx[1, 1] = thickness_y + vacuum
+        latt_mx[2, 2] = thickness_z + vacuum
+
     if dimensionality == 0 and 'Molecule' in str(type(structure)):
         molecule = structure
         is_molecule = True # 0D object called as molecule
@@ -558,6 +568,8 @@ def cry_pmg2gui(structure, gui_file=None, pbc=None, vacuum=None, symmetry=True,
 
                 sg = SpacegroupAnalyzer(structure)
                 ops = sg.get_symmetry_operations(cartesian=True)
+                n_symmops = 0
+                gui.symmops = []
                 for op in ops:
                     if np.all(op.translation_vector == 0.):
                         n_symmops += 1
